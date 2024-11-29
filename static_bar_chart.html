@@ -3,55 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top EV Companies by Vehicle Count</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>Electric Vehicle Population Analysis</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script> 
 </head>
 <body>
-    <h1>Top Electric Vehicle Companies by Vehicle Count</h1>
-    <div id="chart"></div>
+    <h1>Top EV Companies by Vehicle Count</h1>
+    <svg width="800" height="600"></svg> 
 
     <script>
-        // Loading CSV
+        // Loading data
         d3.csv("Electric Vehicle Population Data.csv").then(function(data) {
+            console.log("Data loaded");
 
-            // Parsing data
-            data.forEach(function(d) { d.Vehicle_Count = +d.Vehicle_Count; });
+            // Converting vehicle count to number
+            data.forEach(function(d) {
+                d["Vehicle Count"] = +d["Vehicle Count"];
+            });
 
-            // Setting up chart size
-            var margin = { top: 40, right: 20, bottom: 40, left: 50 },
-                width = 800 - margin.left - margin.right,
-                height = 500 - margin.top - margin.bottom;
+            // Set margins, width, height
+            const margin = {top: 20, right: 30, bottom: 40, left: 40};
+            const width = 800 - margin.left - margin.right;
+            const height = 600 - margin.top - margin.bottom;
 
-            // Creating SVG container
-            var svg = d3.select("#chart").append("svg")
+            const svg = d3.select("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            // Setting X and Y scales
-            var x = d3.scaleBand().domain(data.map(function(d) { return d.Company; }))
-                .range([0, width]).padding(0.1);
-            var y = d3.scaleLinear().domain([0, d3.max(data, function(d) { return d.Vehicle_Count; })])
-                .nice().range([height, 0]);
+            // Set scales
+            const x = d3.scaleBand()
+                .domain(data.map(d => d["Company"]))
+                .range([0, width])
+                .padding(0.1);
 
-            // Adding axes
-            svg.append("g").attr("transform", "translate(0," + height + ")").call(d3.axisBottom(x));
-            svg.append("g").call(d3.axisLeft(y));
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d["Vehicle Count"])])
+                .nice()
+                .range([height, 0]);
 
-            // Drawing bars
-            svg.selectAll(".bar").data(data).enter().append("rect")
-                .attr("x", function(d) { return x(d.Company); })
-                .attr("y", function(d) { return y(d.Vehicle_Count); })
+            // Create bars
+            svg.selectAll(".bar")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d["Company"]))
+                .attr("y", d => y(d["Vehicle Count"]))
                 .attr("width", x.bandwidth())
-                .attr("height", function(d) { return height - y(d.Vehicle_Count); })
-                .style("fill", "#4CAF50");
+                .attr("height", d => height - y(d["Vehicle Count"]))
+                .attr("fill", "#69b3a2");
+
+            // X axis
+            svg.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x).tickSize(0));
+
+            // Y axis
+            svg.append("g")
+                .attr("class", "y-axis")
+                .call(d3.axisLeft(y).ticks(5));
+
+            // Label axes
+            svg.selectAll(".x-axis text")
+                .style("text-anchor", "middle")
+                .style("font-size", "12px");
+
+            svg.selectAll(".y-axis text")
+                .style("text-anchor", "middle")
+                .style("font-size", "12px");
 
             // Title
-            svg.append("text").attr("x", width / 2).attr("y", -margin.top / 2)
-                .attr("text-anchor", "middle").style("font-size", "16px")
-                .style("font-weight", "bold").text("EV Companies by Vehicle Count");
-
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", -10)
+                .attr("text-anchor", "middle")
+                .style("font-size", "18px")
+                .text("Electric Vehicle Population by Company");
+        }).catch(function(error) {
+            console.log(error);
         });
     </script>
 </body>
