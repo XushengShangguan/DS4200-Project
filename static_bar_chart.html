@@ -1,88 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electric Vehicle Population Analysis</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electric Vehicle Population</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .bar { fill: steelblue; }
+    .axis-label { font-size: 12px; }
+  </style>
 </head>
 <body>
-    <h1>Top EV Companies by Vehicle Count</h1>
-    <svg width="800" height="600"></svg> 
+  <h1>Top EV Companies by Vehicle Count</h1>
+  <svg width="800" height="400"></svg>
+  
+  <script>
+    // Load CSV
+    d3.csv("Electric Vehicle Population Data.csv").then(function(data) {
+      
+      // Group data by Make and count
+      const makeCount = d3.rollup(data, v => v.length, d => d.Make);
 
-    <script>
-        // Loading data
-        d3.csv("Electric Vehicle Population Data.csv").then(function(data) {
-            console.log("Data loaded");
+      // Convert map to array
+      const makeArray = Array.from(makeCount, ([make, count]) => ({ make, count }));
 
-            // Converting vehicle count to number
-            data.forEach(function(d) {
-                d["Vehicle Count"] = +d["Vehicle Count"];
-            });
+      // Sort by count
+      makeArray.sort((a, b) => b.count - a.count);
 
-            // Set margins, width, height
-            const margin = {top: 20, right: 30, bottom: 40, left: 40};
-            const width = 800 - margin.left - margin.right;
-            const height = 600 - margin.top - margin.bottom;
+      // Set up canvas
+      const svg = d3.select("svg");
+      const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+      const width = +svg.attr("width") - margin.left - margin.right;
+      const height = +svg.attr("height") - margin.top - margin.bottom;
 
-            const svg = d3.select("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      // Create scales
+      const x = d3.scaleBand()
+        .domain(makeArray.map(d => d.make))
+        .range([0, width])
+        .padding(0.1);
 
-            // Set scales
-            const x = d3.scaleBand()
-                .domain(data.map(d => d["Company"]))
-                .range([0, width])
-                .padding(0.1);
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(makeArray, d => d.count)])
+        .nice()
+        .range([height, 0]);
 
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(data, d => d["Vehicle Count"])])
-                .nice()
-                .range([height, 0]);
+      // Append group
+      const g = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-            // Create bars
-            svg.selectAll(".bar")
-                .data(data)
-                .enter().append("rect")
-                .attr("class", "bar")
-                .attr("x", d => x(d["Company"]))
-                .attr("y", d => y(d["Vehicle Count"]))
-                .attr("width", x.bandwidth())
-                .attr("height", d => height - y(d["Vehicle Count"]))
-                .attr("fill", "#69b3a2");
+      // X axis
+      g.append("g")
+        .selectAll(".tick")
+        .data(makeArray)
+        .enter().append("g")
+        .attr("class", "tick")
+        .attr("transform", d => `translate(${x(d.make)},0)`)
+        .append("text")
+        .attr("y", height + 10)
+        .attr("x", x.bandwidth() / 2)
+        .attr("dy", ".71em")
+        .attr("text-anchor", "middle")
+        .attr("class", "axis-label")
+        .text(d => d.make);
 
-            // X axis
-            svg.append("g")
-                .attr("class", "x-axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x).tickSize(0));
+      // Y axis
+      g.append("g")
+        .call(d3.axisLeft(y))
+        .attr("class", "axis-label");
 
-            // Y axis
-            svg.append("g")
-                .attr("class", "y-axis")
-                .call(d3.axisLeft(y).ticks(5));
+      // Bars
+      g.selectAll(".bar")
+        .data(makeArray)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", d => x(d.make))
+        .attr("y", d => y(d.count))
+        .attr("width", x.bandwidth())
+        .attr("height", d => height - y(d.count));
 
-            // Label axes
-            svg.selectAll(".x-axis text")
-                .style("text-anchor", "middle")
-                .style("font-size", "12px");
-
-            svg.selectAll(".y-axis text")
-                .style("text-anchor", "middle")
-                .style("font-size", "12px");
-
-            // Title
-            svg.append("text")
-                .attr("x", width / 2)
-                .attr("y", -10)
-                .attr("text-anchor", "middle")
-                .style("font-size", "18px")
-                .text("Electric Vehicle Population by Company");
-        }).catch(function(error) {
-            console.log(error);
-        });
-    </script>
+    }).catch(function(error) {
+      console.error("Error:", error);
+    });
+  </script>
 </body>
 </html>
