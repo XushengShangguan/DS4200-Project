@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Market Growth by Company</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* styles */
+        .chart {
+            font-family: Arial, sans-serif;
+        }
+        .bar {
+            fill: steelblue;
+        }
+        .bar:hover {
+            fill: orange;
+        }
+        .axis-label {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top EV Companies by Vehicle Count</h1>
+    <svg id="chart" class="chart" width="800" height="500"></svg>
+
+    <script>
+        // Load the data
+        d3.csv('Electric_Vehicle_Population_Data.csv').then(function(data) {
+            // Count vehicles by company
+            const companyCounts = d3.rollup(data, v => v.length, d => d.Make);
+            const sortedData = Array.from(companyCounts, ([Make, Count]) => ({ Make, Count }))
+                .sort((a, b) => d3.descending(a.Count, b.Count))
+                .slice(0, 10); // Top 10 companies
+
+            // Chart dimensions
+            const width = 800;
+            const height = 500;
+            const margin = { top: 30, right: 20, bottom: 50, left: 100 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // Set up SVG canvas
+            const svg = d3.select("#chart")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // Scales
+            const x = d3.scaleBand()
+                .domain(sortedData.map(d => d.Make))
+                .range([0, chartWidth])
+                .padding(0.1);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(sortedData, d => d.Count)])
+                .nice()
+                .range([chartHeight, 0]);
+
+            // Add bars
+            svg.selectAll(".bar")
+                .data(sortedData)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.Make))
+                .attr("y", d => y(d.Count))
+                .attr("width", x.bandwidth())
+                .attr("height", d => chartHeight - y(d.Count));
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${chartHeight})`)
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .attr("transform", "rotate(-45)")
+                .style("text-anchor", "end");
+
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // X axis label
+            svg.append("text")
+                .attr("x", chartWidth / 2)
+                .attr("y", chartHeight + 40)
+                .style("text-anchor", "middle")
+                .text("Company");
+
+            // Y axis label
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -chartHeight / 2)
+                .attr("y", -margin.left + 20)
+                .style("text-anchor", "middle")
+                .text("Number of Vehicles");
+        }).catch(function(error) {
+            console.error("Error loading data:", error);
+        });
+    </script>
+</body>
+</html>
