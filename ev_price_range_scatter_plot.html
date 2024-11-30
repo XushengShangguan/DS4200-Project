@@ -1,0 +1,19 @@
+import altair as alt
+import pandas as pd
+
+# Load data 
+data = pd.read_csv("Electric Vehicle Population Data.csv")
+
+# Create the scatter plot w Altair
+scatter_plot = alt.Chart(data).mark_circle().encode(
+    x='price:Q',  # Numeric encoding for price
+    y='year:Q',   # Numeric encoding for year
+    color='manufacturer:N',  # Categorical encoding for manufacturer
+    size='popularity:Q',  # Optional: Size by popularity (if available)
+    tooltip=['model:N', 'price:Q', 'year:Q', 'manufacturer:N']  # Show model, price, year, manufacturer on hover
+).properties(
+    title="Electric Vehicle Price vs Year"
+)
+
+# Save plot as an HTML 
+scatter_plot.save('ev_price_range_scatter_plot.html')
