@@ -1,19 +1,110 @@
-import altair as alt
-import pandas as pd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EV Price Scatter Plot</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .dot {
+      stroke: black;
+      stroke-width: 1px;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      shape-rendering: crispEdges;
+    }
+    .tooltip {
+      position: absolute;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 5px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Electric Range vs Base MSRP</h1>
+  <div id="chart"></div>
 
-# Load data 
-data = pd.read_csv("Electric Vehicle Population Data.csv")
+  <script>
+    // Set dimensions and margins
+    const margin = {top: 20, right: 30, bottom: 50, left: 50},
+          width = 800 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
 
-# Create the scatter plot w Altair
-scatter_plot = alt.Chart(data).mark_circle().encode(
-    x='price:Q',  # Numeric encoding for price
-    y='year:Q',   # Numeric encoding for year
-    color='manufacturer:N',  # Categorical encoding for manufacturer
-    size='popularity:Q',  # Optional: Size by popularity (if available)
-    tooltip=['model:N', 'price:Q', 'year:Q', 'manufacturer:N']  # Show model, price, year, manufacturer on hover
-).properties(
-    title="Electric Vehicle Price vs Year"
-)
+    // Append SVG
+    const svg = d3.select("#chart")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
 
-# Save plot as an HTML 
-scatter_plot.save('ev_price_range_scatter_plot.html')
+    // Add tooltip
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    // Load data
+    d3.csv("Electric Vehicle Population Data.csv").then(data => {
+      // Parse data
+      data.forEach(d => {
+        d["Base MSRP"] = +d["Base MSRP"];
+        d["Electric Range"] = +d["Electric Range"];
+      });
+
+      // Set scales
+      const x = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d["Electric Range"])])
+        .range([0, width]);
+
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d["Base MSRP"])])
+        .range([height, 0]);
+
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      // Add axes
+      svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(10))
+        .append("text")
+        .attr("x", width / 2)
+        .attr("y", 40)
+        .attr("fill", "black")
+        .style("text-anchor", "middle")
+        .text("Electric Range (Miles)");
+
+      svg.append("g")
+        .call(d3.axisLeft(y).ticks(10))
+        .append("text")
+        .attr("x", -height / 2)
+        .attr("y", -40)
+        .attr("fill", "black")
+        .style("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .text("Base MSRP ($)");
+
+      // Add dots
+      svg.selectAll(".dot")
+        .data(data)
+        .join("circle")
+        .attr("class", "dot")
+        .attr("cx", d => x(d["Electric Range"]))
+        .attr("cy", d => y(d["Base MSRP"]))
+        .attr("r", 5)
+        .style("fill", d => color(d.Make))
+        .on("mouseover", (event, d) => {
+          tooltip.style("opacity", 1)
+            .html(`Make: ${d.Make}<br>Model: ${d.Model}<br>Year: ${d["Model Year"]}<br>Range: ${d["Electric Range"]} miles<br>Price: $${d["Base MSRP"]}`)
+            .style("left", `${event.pageX + 10}px`)
+            .style("top", `${event.pageY - 28}px`);
+        })
+        .on("mouseout", () => tooltip.style("opacity", 0));
+    });
+  </script>
+</body>
+</html>
