@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EV Bubble Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Electric Vehicle Bubble Chart</h1>
+    <div id="chart"></div>
+    <script>
+        const margin = { top: 50, right: 50, bottom: 50, left: 100 };
+        const width = 1000 - margin.left - margin.right;
+        const height = 600 - margin.top - margin.bottom;
+
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        //tooltip  
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        // load data
+        d3.csv("Electric Vehicle Population Data.csv").then(data => {
+            // parse 
+            data.forEach(d => {
+                d.ElectricRange = +d["Electric Range"];
+                d.BaseMSRP = +d["Base MSRP"];
+            });
+
+            // aggregate data by manufacturer
+            const groupedData = d3.rollup(data,
+                v => ({
+                    count: v.length,
+                    avgRange: d3.mean(v, d => d.ElectricRange),
+                    avgMSRP: d3.mean(v, d => d.BaseMSRP)
+                }),
+                d => d.Make
+            );
+
+            const processedData = Array.from(groupedData, ([Make, values]) => ({
+                Make,
+                count: values.count,
+                avgRange: values.avgRange,
+                avgMSRP: values.avgMSRP
+            }));
+
+            //scales
+            const xScale = d3.scaleLinear()
+                .domain([0, d3.max(processedData, d => d.avgRange) + 50])
+                .range([0, width]);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(processedData, d => d.avgMSRP) + 10000])
+                .range([height, 0]);
+
+            const sizeScale = d3.scaleSqrt()
+                .domain([0, d3.max(processedData, d => d.count)])
+                .range([5, 30]);
+
+            const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+            //axes
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(xScale).tickFormat(d => d + " miles"));
+
+            svg.append("g")
+                .call(d3.axisLeft(yScale).tickFormat(d => "$" + d.toLocaleString()));
+
+            // xxis labels
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom - 10)
+                .attr("text-anchor", "middle")
+                .text("Electric Range (Miles)");
+
+            svg.append("text")
+                .attr("x", -height / 2)
+                .attr("y", -margin.left + 20)
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .text("Base MSRP ($)");
+
+            // bubbles
+            svg.selectAll("circle")
+                .data(processedData)
+                .enter()
+                .append("circle")
+                .attr("cx", d => xScale(d.avgRange))
+                .attr("cy", d => yScale(d.avgMSRP))
+                .attr("r", d => sizeScale(d.count))
+                .attr("fill", d => colorScale(d.Make))
+                .attr("opacity", 0.7)
+                .on("mouseover", (event, d) => {
+                    tooltip.transition().duration(200).style("opacity", 1);
+                    tooltip.html(`
+                        <strong>Make:</strong> ${d.Make}<br>
+                        <strong>Avg Range:</strong> ${Math.round(d.avgRange)} miles<br>
+                        <strong>Avg MSRP:</strong> $${Math.round(d.avgMSRP).toLocaleString()}<br>
+                        <strong>Model Count:</strong> ${d.count}
+                    `)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 20) + "px");
+                })
+                .on("mouseout", () => tooltip.transition().duration(200).style("opacity", 0));
+
+            // title
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", -margin.top / 2)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "20px")
+                .text("Electric Range vs Base MSRP by Manufacturer");
+        });
+    </script>
+</body>
+</html>
