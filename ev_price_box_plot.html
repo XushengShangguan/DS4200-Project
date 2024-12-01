@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base MSRP Distribution - Box Plot</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .box {
+            fill: steelblue;
+            opacity: 0.5;
+        }
+        .median {
+            stroke: black;
+            stroke-width: 2;
+        }
+        .axis-label {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h2 class="title">Base MSRP Distribution - Box Plot</h2>
+    <svg width="800" height="400"></svg>
+
+    <script>
+        //load data
+        d3.csv("Electric Vehicle Population Data.csv").then(function(data) {
+
+            //parse numeric values from the data
+            data.forEach(function(d) {
+                d['Base MSRP ($)'] = +d['Base MSRP ($)'];
+            });
+
+            //SVG dimensions and margins
+            const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+            const width = 800 - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+
+            //SVG container
+            const svg = d3.select("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            //prepare the data for the box plot
+            const minPrice = d3.min(data, function(d) { return d['Base MSRP ($)']; });
+            const maxPrice = d3.max(data, function(d) { return d['Base MSRP ($)']; });
+            const medianPrice = d3.median(data, function(d) { return d['Base MSRP ($)']; });
+            const q1Price = d3.quantile(data.map(d => d['Base MSRP ($)']).sort(d3.ascending), 0.25);
+            const q3Price = d3.quantile(data.map(d => d['Base MSRP ($)']).sort(d3.ascending), 0.75);
+            const iqr = q3Price - q1Price;
+            const lowerWhisker = Math.max(minPrice, q1Price - 1.5 * iqr);
+            const upperWhisker = Math.min(maxPrice, q3Price + 1.5 * iqr);
+
+            //define scales
+            const xScale = d3.scaleBand().domain([0]).range([0, width]).padding(0.5);
+            const yScale = d3.scaleLinear().domain([lowerWhisker, upperWhisker]).range([height, 0]);
+
+            //append vertical line/box plot
+            svg.append("line")
+                .attr("x1", xScale(0))
+                .attr("x2", xScale(0))
+                .attr("y1", yScale(upperWhisker))
+                .attr("y2", yScale(lowerWhisker))
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 3);
+
+            //append the IQR
+            svg.append("rect")
+                .attr("x", xScale(0) - 20)
+                .attr("y", yScale(q3Price))
+                .attr("width", 40)
+                .attr("height", yScale(q1Price) - yScale(q3Price))
+                .attr("fill", "steelblue")
+                .attr("opacity", 0.5);
+
+            //append median line
+            svg.append("line")
+                .attr("x1", xScale(0) - 20)
+                .attr("x2", xScale(0) + 20)
+                .attr("y1", yScale(medianPrice))
+                .attr("y2", yScale(medianPrice))
+                .attr("stroke", "black")
+                .attr("stroke-width", 2);
+
+            //y-axis
+            const yAxis = d3.axisLeft(yScale);
+            svg.append("g")
+                .call(yAxis);
+
+            //axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("x", -40)
+                .attr("y", height / 2)
+                .style("text-anchor", "middle")
+                .text("Base MSRP ($)");
+        });
+    </script>
+</body>
+</html>
