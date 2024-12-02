@@ -38,19 +38,19 @@
                   .append("g")
                   .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    //load data
+    // data
     d3.csv("Electric Vehicle Population Data.csv").then(data => {
-      // Group data by Electric Vehicle Type and count occurrences
+      // group data by Electric Vehicle Type and count occurrences
       const counts = d3.rollups(
         data,
-        group => group.length, // Count vehicles
-        d => d['Electric Vehicle Type'] // Group by vehicle type
+        group => group.length, // count vehicles
+        d => d['Electric Vehicle Type'] // group by vehicle type
       ).map(([Type, count]) => ({ Type, count }));
 
       //sort data in descending order based on count
       counts.sort((a, b) => b.count - a.count);
 
-      //scales
+      //define scales
       const x = d3.scaleBand()
                   .domain(counts.map(d => d.Type))
                   .range([0, width])
@@ -60,26 +60,25 @@
                   .domain([0, d3.max(counts, d => d.count)])
                   .range([height, 0]);
 
-      //blue for BEV and pink for PHEV
+      // blue for BEV, pink for PHEV
       const color = d3.scaleOrdinal()
                       .domain(counts.map(d => d.Type))
-                      .range(['#1f77b4', '#ff69b4']); // blue for BEV, pink for PHEV
+                      .range(['#1f77b4', '#ff69b4']); 
 
-      //x-axis
+      // x-axis
       svg.append("g")
          .attr("transform", `translate(0,${height})`)
          .call(d3.axisBottom(x))
          .selectAll("text")
-         .attr("transform", "rotate(-45)")
-         .style("text-anchor", "end")
+         .style("text-anchor", "middle")
          .attr("class", "axis-label");
 
-      // y-axis
+      //  y-axis
       svg.append("g")
          .call(d3.axisLeft(y).ticks(10))
          .attr("class", "y-axis");
 
-      //bars
+      // bars
       svg.selectAll(".bar")
          .data(counts)
          .enter()
@@ -91,7 +90,7 @@
          .attr("height", d => height - y(d.count))
          .attr("fill", d => color(d.Type));
 
-      //title for x-axis
+      // title for x-axis
       svg.append("text")
          .attr("x", width / 2)
          .attr("y", height + margin.bottom - 40)
@@ -99,14 +98,14 @@
          .attr("class", "axis-label")
          .text("Electric Vehicle Type");
 
-      //y-axis label manually as "BEV" and "PHEV"
+      // y-axis label - Number of Vehicles
       svg.append("text")
          .attr("x", -height / 2)
          .attr("y", -margin.left + 15)
          .attr("text-anchor", "middle")
          .attr("transform", "rotate(-90)")
          .attr("class", "axis-label")
-         .text("BEV / PHEV");
+         .text("Number of Vehicles");
     });
   </script>
 </body>
