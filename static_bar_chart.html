@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EV Manufacturer Counts</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .bar { fill: steelblue; }
+    .axis-label { font-size: 12px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2 style="text-align: center;">Top EV Manufacturers by Vehicle Count</h2>
+  <script>
+    // Set dimensions
+    const width = 800, height = 400, margin = { top: 20, right: 30, bottom: 100, left: 60 };
+
+    // Create SVG
+    const svg = d3.select("body")
+                  .append("svg")
+                  .attr("width", width + margin.left + margin.right)
+                  .attr("height", height + margin.top + margin.bottom)
+                  .append("g")
+                  .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Load data
+    d3.csv("Electric Vehicle Population Data.csv").then(data => {
+      // Parse and aggregate data by Make
+      const counts = d3.rollups(
+        data,
+        group => group.length, // Count vehicles
+        d => d.Make // Group by manufacturer
+      ).map(([Make, count]) => ({ Make, count }));
+
+      // Sort by count and select top 20 manufacturers
+      const topManufacturers = counts.sort((a, b) => b.count - a.count).slice(0, 20);
+
+      // Define scales
+      const x = d3.scaleBand()
+                  .domain(topManufacturers.map(d => d.Make))
+                  .range([0, width])
+                  .padding(0.2);
+
+      const y = d3.scaleLinear()
+                  .domain([0, d3.max(topManufacturers, d => d.count)])
+                  .range([height, 0]);
+
+      // Add axes
+      svg.append("g")
+         .call(d3.axisLeft(y).ticks(10))
+         .selectAll("text")
+         .attr("class", "axis-label");
+
+      svg.append("g")
+         .attr("transform", `translate(0,${height})`)
+         .call(d3.axisBottom(x))
+         .selectAll("text")
+         .attr("transform", "rotate(-45)")
+         .style("text-anchor", "end");
+
+      // Add bars
+      svg.selectAll(".bar")
+         .data(topManufacturers)
+         .enter()
+         .append("rect")
+         .attr("class", "bar")
+         .attr("x", d => x(d.Make))
+         .attr("y", d => y(d.count))
+         .attr("width", x.bandwidth())
+         .attr("height", d => height - y(d.count));
+
+      // Add labels
+      svg.append("text")
+         .attr("x", width / 2)
+         .attr("y", height + margin.bottom - 40)
+         .attr("text-anchor", "middle")
+         .attr("class", "axis-label")
+         .text("Manufacturer");
+
+      svg.append("text")
+         .attr("x", -height / 2)
+         .attr("y", -margin.left + 15)
+         .attr("text-anchor", "middle")
+         .attr("transform", "rotate(-90)")
+         .attr("class", "axis-label")
+         .text("Vehicle Count");
+    });
+  </script>
+</body>
+</html>

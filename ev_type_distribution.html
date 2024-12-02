@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EV Manufacturer Type Distribution</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .bar {
+      opacity: 0.7;
+    }
+
+    .axis-label {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .x-axis text, .y-axis text {
+      font-size: 12px;
+    }
+
+    .bar:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align: center;">Distribution of Electric Vehicle Types (BEV vs PHEV)</h2>
+  <script>
+    //dimensions
+    const width = 800, height = 400, margin = { top: 20, right: 30, bottom: 100, left: 60 };
+
+    // SVG
+    const svg = d3.select("body")
+                  .append("svg")
+                  .attr("width", width + margin.left + margin.right)
+                  .attr("height", height + margin.top + margin.bottom)
+                  .append("g")
+                  .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // data
+    d3.csv("Electric Vehicle Population Data.csv").then(data => {
+      // group data by Electric Vehicle Type and count occurrences
+      const counts = d3.rollups(
+        data,
+        group => group.length, // count vehicles
+        d => d['Electric Vehicle Type'] // group by vehicle type
+      ).map(([Type, count]) => ({ Type, count }));
+
+      //sort data in descending order based on count
+      counts.sort((a, b) => b.count - a.count);
+
+      //define scales
+      const x = d3.scaleBand()
+                  .domain(counts.map(d => d.Type))
+                  .range([0, width])
+                  .padding(0.2);
+
+      const y = d3.scaleLinear()
+                  .domain([0, d3.max(counts, d => d.count)])
+                  .range([height, 0]);
+
+      // blue for BEV, pink for PHEV
+      const color = d3.scaleOrdinal()
+                      .domain(counts.map(d => d.Type))
+                      .range(['#1f77b4', '#ff69b4']); 
+
+      // x-axis
+      svg.append("g")
+         .attr("transform", `translate(0,${height})`)
+         .call(d3.axisBottom(x))
+         .selectAll("text")
+         .style("text-anchor", "middle")
+         .attr("class", "axis-label");
+
+      //  y-axis
+      svg.append("g")
+         .call(d3.axisLeft(y).ticks(10))
+         .attr("class", "y-axis");
+
+      // bars
+      svg.selectAll(".bar")
+         .data(counts)
+         .enter()
+         .append("rect")
+         .attr("class", "bar")
+         .attr("x", d => x(d.Type))
+         .attr("y", d => y(d.count))
+         .attr("width", x.bandwidth())
+         .attr("height", d => height - y(d.count))
+         .attr("fill", d => color(d.Type));
+
+      // title for x-axis
+      svg.append("text")
+         .attr("x", width / 2)
+         .attr("y", height + margin.bottom - 40)
+         .attr("text-anchor", "middle")
+         .attr("class", "axis-label")
+         .text("Electric Vehicle Type");
+
+      // y-axis label - Number of Vehicles
+      svg.append("text")
+         .attr("x", -height / 2)
+         .attr("y", -margin.left + 15)
+         .attr("text-anchor", "middle")
+         .attr("transform", "rotate(-90)")
+         .attr("class", "axis-label")
+         .text("Number of Vehicles");
+    });
+  </script>
+</body>
+</html>
