@@ -27,10 +27,10 @@
 <body>
   <h2 style="text-align: center;">Distribution of Electric Vehicle Types (BEV vs PHEV)</h2>
   <script>
-    // dimensions
+    //dimensions
     const width = 800, height = 400, margin = { top: 20, right: 30, bottom: 100, left: 60 };
 
-    // Create SVG
+    // SVG
     const svg = d3.select("body")
                   .append("svg")
                   .attr("width", width + margin.left + margin.right)
@@ -38,7 +38,7 @@
                   .append("g")
                   .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    //l data
+    //load data
     d3.csv("Electric Vehicle Population Data.csv").then(data => {
       // Group data by Electric Vehicle Type and count occurrences
       const counts = d3.rollups(
@@ -47,10 +47,10 @@
         d => d['Electric Vehicle Type'] // Group by vehicle type
       ).map(([Type, count]) => ({ Type, count }));
 
-      // Sort data in descending order based on count
+      //sort data in descending order based on count
       counts.sort((a, b) => b.count - a.count);
 
-      // Define scales
+      //scales
       const x = d3.scaleBand()
                   .domain(counts.map(d => d.Type))
                   .range([0, width])
@@ -60,9 +60,10 @@
                   .domain([0, d3.max(counts, d => d.count)])
                   .range([height, 0]);
 
+      //blue for BEV and pink for PHEV
       const color = d3.scaleOrdinal()
                       .domain(counts.map(d => d.Type))
-                      .range(d3.schemeCategory10);
+                      .range(['#1f77b4', '#ff69b4']); // blue for BEV, pink for PHEV
 
       //x-axis
       svg.append("g")
@@ -90,7 +91,7 @@
          .attr("height", d => height - y(d.count))
          .attr("fill", d => color(d.Type));
 
-      // title for x-axis
+      //title for x-axis
       svg.append("text")
          .attr("x", width / 2)
          .attr("y", height + margin.bottom - 40)
@@ -98,14 +99,14 @@
          .attr("class", "axis-label")
          .text("Electric Vehicle Type");
 
-      // title for y-axis
+      //y-axis label manually as "BEV" and "PHEV"
       svg.append("text")
          .attr("x", -height / 2)
          .attr("y", -margin.left + 15)
          .attr("text-anchor", "middle")
          .attr("transform", "rotate(-90)")
          .attr("class", "axis-label")
-         .text("Number of Vehicles");
+         .text("BEV / PHEV");
     });
   </script>
 </body>
