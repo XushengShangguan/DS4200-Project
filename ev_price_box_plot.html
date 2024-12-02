@@ -26,7 +26,7 @@
                   .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // load data
-    d3.csv("Electric_Vehicle_Data.csv").then(data => {
+    d3.csv("EElectric Vehicle Population Data.csv").then(data => {
       // preprocess and group the data by Make and Type (BEV, PHEV)
       const groupedData = d3.rollups(
         data,
