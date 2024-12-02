@@ -6,18 +6,31 @@
   <title>EV Manufacturer Type Distribution</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    .bar { opacity: 0.8; }
-    .axis-label { font-size: 12px; font-weight: bold; }
-    .legend { font-size: 12px; }
+    .bar {
+      opacity: 0.7;
+    }
+
+    .axis-label {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .x-axis text, .y-axis text {
+      font-size: 12px;
+    }
+
+    .bar:hover {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
-  <h2 style="text-align: center;">EV Manufacturer Type Distribution (BEV vs PHEV)</h2>
+  <h2 style="text-align: center;">Distribution of Electric Vehicle Types (BEV vs PHEV)</h2>
   <script>
     // dimensions
     const width = 800, height = 400, margin = { top: 20, right: 30, bottom: 100, left: 60 };
 
-    // create SVG
+    // Create SVG
     const svg = d3.select("body")
                   .append("svg")
                   .attr("width", width + margin.left + margin.right)
@@ -25,39 +38,33 @@
                   .append("g")
                   .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // load data
-    d3.csv("EElectric Vehicle Population Data.csv").then(data => {
-      // preprocess and group the data by Make and Type (BEV, PHEV)
-      const groupedData = d3.rollups(
+    //l data
+    d3.csv("Electric Vehicle Population Data.csv").then(data => {
+      // Group data by Electric Vehicle Type and count occurrences
+      const counts = d3.rollups(
         data,
-        group => d3.sum(group, d => 1), // Count vehicles
-        d => d.Make, // Group by manufacturer
-        d => d.Type // Group by BEV or PHEV
-      );
+        group => group.length, // Count vehicles
+        d => d['Electric Vehicle Type'] // Group by vehicle type
+      ).map(([Type, count]) => ({ Type, count }));
 
-      //format data for stacked bar chart
-      const formattedData = groupedData.map(([Make, types]) => {
-        const bevCount = types.find(d => d[0] === "BEV") ? types.find(d => d[0] === "BEV")[1] : 0;
-        const phevCount = types.find(d => d[0] === "PHEV") ? types.find(d => d[0] === "PHEV")[1] : 0;
-        return { Make, BEV: bevCount, PHEV: phevCount };
-      });
+      // Sort data in descending order based on count
+      counts.sort((a, b) => b.count - a.count);
 
-      // scales
+      // Define scales
       const x = d3.scaleBand()
-                  .domain(formattedData.map(d => d.Make))
+                  .domain(counts.map(d => d.Type))
                   .range([0, width])
                   .padding(0.2);
 
       const y = d3.scaleLinear()
-                  .domain([0, d3.max(formattedData, d => d.BEV + d.PHEV)])
+                  .domain([0, d3.max(counts, d => d.count)])
                   .range([height, 0]);
 
-      //axes
-      svg.append("g")
-         .call(d3.axisLeft(y).ticks(10))
-         .selectAll("text")
-         .attr("class", "axis-label");
+      const color = d3.scaleOrdinal()
+                      .domain(counts.map(d => d.Type))
+                      .range(d3.schemeCategory10);
 
+      //x-axis
       svg.append("g")
          .attr("transform", `translate(0,${height})`)
          .call(d3.axisBottom(x))
@@ -66,48 +73,39 @@
          .style("text-anchor", "end")
          .attr("class", "axis-label");
 
-      //add stacked bars
+      // y-axis
+      svg.append("g")
+         .call(d3.axisLeft(y).ticks(10))
+         .attr("class", "y-axis");
+
+      //bars
       svg.selectAll(".bar")
-         .data(formattedData)
-         .enter()
-         .append("g")
-         .attr("transform", d => `translate(${x(d.Make)}, 0)`)
-         .selectAll("rect")
-         .data(d => [
-            { type: "BEV", value: d.BEV },
-            { type: "PHEV", value: d.PHEV }
-         ])
+         .data(counts)
          .enter()
          .append("rect")
          .attr("class", "bar")
-         .attr("x", 0)
-         .attr("y", d => y(d.value + (d.type === "BEV" ? 0 : d.value))) // Stack BEV on top of PHEV
+         .attr("x", d => x(d.Type))
+         .attr("y", d => y(d.count))
          .attr("width", x.bandwidth())
-         .attr("height", d => height - y(d.value))
-         .attr("fill", d => d.type === "BEV" ? "steelblue" : "orange");
+         .attr("height", d => height - y(d.count))
+         .attr("fill", d => color(d.Type));
 
-      //legend
-      svg.append("circle").attr("cx", 20).attr("cy", height + 30).attr("r", 6).style("fill", "steelblue");
-      svg.append("text").attr("x", 35).attr("y", height + 30).text("BEV").attr("class", "legend");
-
-      svg.append("circle").attr("cx", 20).attr("cy", height + 50).attr("r", 6).style("fill", "orange");
-      svg.append("text").attr("x", 35).attr("y", height + 50).text("PHEV").attr("class", "legend");
-      
-      //axis labels
+      // title for x-axis
       svg.append("text")
          .attr("x", width / 2)
          .attr("y", height + margin.bottom - 40)
          .attr("text-anchor", "middle")
          .attr("class", "axis-label")
-         .text("Manufacturer");
+         .text("Electric Vehicle Type");
 
+      // title for y-axis
       svg.append("text")
          .attr("x", -height / 2)
          .attr("y", -margin.left + 15)
          .attr("text-anchor", "middle")
          .attr("transform", "rotate(-90)")
          .attr("class", "axis-label")
-         .text("Vehicle Count");
+         .text("Number of Vehicles");
     });
   </script>
 </body>
