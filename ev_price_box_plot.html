@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EV Manufacturer Vehicle Count (Scatter Plot with Jitter)</title>
+  <title>EV Manufacturer Type Distribution</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    .dot { fill: steelblue; }
+    .bar { opacity: 0.8; }
     .axis-label { font-size: 12px; font-weight: bold; }
+    .legend { font-size: 12px; }
   </style>
 </head>
 <body>
-  <h2 style="text-align: center;">EV Manufacturer Vehicle Count (Scatter Plot with Jitter)</h2>
+  <h2 style="text-align: center;">EV Manufacturer Type Distribution (BEV vs PHEV)</h2>
   <script>
-    //dimensions
+    // dimensions
     const width = 800, height = 400, margin = { top: 20, right: 30, bottom: 100, left: 60 };
 
-    // SVG
+    // create SVG
     const svg = d3.select("body")
                   .append("svg")
                   .attr("width", width + margin.left + margin.right)
@@ -24,19 +25,34 @@
                   .append("g")
                   .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Load data
-    d3.csv("Electric Vehicle Population Data.csv").then(data => {
-      // Define scales
+    // load data
+    d3.csv("Electric_Vehicle_Data.csv").then(data => {
+      // preprocess and group the data by Make and Type (BEV, PHEV)
+      const groupedData = d3.rollups(
+        data,
+        group => d3.sum(group, d => 1), // Count vehicles
+        d => d.Make, // Group by manufacturer
+        d => d.Type // Group by BEV or PHEV
+      );
+
+      //format data for stacked bar chart
+      const formattedData = groupedData.map(([Make, types]) => {
+        const bevCount = types.find(d => d[0] === "BEV") ? types.find(d => d[0] === "BEV")[1] : 0;
+        const phevCount = types.find(d => d[0] === "PHEV") ? types.find(d => d[0] === "PHEV")[1] : 0;
+        return { Make, BEV: bevCount, PHEV: phevCount };
+      });
+
+      // scales
       const x = d3.scaleBand()
-                  .domain(data.map(d => d.Make)) // Use each manufacturer
+                  .domain(formattedData.map(d => d.Make))
                   .range([0, width])
                   .padding(0.2);
 
       const y = d3.scaleLinear()
-                  .domain([0, d3.max(data, d => +d.Count)]) // Count of vehicles for each data point
+                  .domain([0, d3.max(formattedData, d => d.BEV + d.PHEV)])
                   .range([height, 0]);
 
-      // Add axes
+      //axes
       svg.append("g")
          .call(d3.axisLeft(y).ticks(10))
          .selectAll("text")
@@ -50,17 +66,34 @@
          .style("text-anchor", "end")
          .attr("class", "axis-label");
 
-      // Add dots (scatter plot with jitter)
-      svg.selectAll(".dot")
-         .data(data)
+      //add stacked bars
+      svg.selectAll(".bar")
+         .data(formattedData)
          .enter()
-         .append("circle")
-         .attr("class", "dot")
-         .attr("cx", (d, i) => x(d.Make) + x.bandwidth() / 2 + (Math.random() - 0.5) * 10) // Add jitter to x position
-         .attr("cy", d => y(+d.Count)) // Use vehicle count
-         .attr("r", 3); // Size of the dots
+         .append("g")
+         .attr("transform", d => `translate(${x(d.Make)}, 0)`)
+         .selectAll("rect")
+         .data(d => [
+            { type: "BEV", value: d.BEV },
+            { type: "PHEV", value: d.PHEV }
+         ])
+         .enter()
+         .append("rect")
+         .attr("class", "bar")
+         .attr("x", 0)
+         .attr("y", d => y(d.value + (d.type === "BEV" ? 0 : d.value))) // Stack BEV on top of PHEV
+         .attr("width", x.bandwidth())
+         .attr("height", d => height - y(d.value))
+         .attr("fill", d => d.type === "BEV" ? "steelblue" : "orange");
 
-      // Add labels
+      //legend
+      svg.append("circle").attr("cx", 20).attr("cy", height + 30).attr("r", 6).style("fill", "steelblue");
+      svg.append("text").attr("x", 35).attr("y", height + 30).text("BEV").attr("class", "legend");
+
+      svg.append("circle").attr("cx", 20).attr("cy", height + 50).attr("r", 6).style("fill", "orange");
+      svg.append("text").attr("x", 35).attr("y", height + 50).text("PHEV").attr("class", "legend");
+      
+      //axis labels
       svg.append("text")
          .attr("x", width / 2)
          .attr("y", height + margin.bottom - 40)
