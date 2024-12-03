@@ -1,83 +1,117 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
+    background-color: #f8f9fa; /* Softer background color */
+    color: #333; /* Text color */
 }
 
 header {
-    background-color: #2c3e50;
+    background-color: #1abc9c; /* Vibrant header color */
     color: white;
     padding: 20px;
     text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
 }
 
 .container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 25px;
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Stronger shadow for pop-out effect */
+    line-height: 1.8;
 }
 
 h1, h2 {
     text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #2c3e50; /* Add a consistent text color */
 }
 
 p {
-    line-height: 1.6;
+    line-height: 1.8;
     margin-bottom: 20px;
+    font-size: 1.1em;
 }
 
 ul {
     list-style-type: none;
     padding: 0;
+    margin: 20px 0;
 }
 
 ul li {
-    margin: 5px 0;
+    margin: 10px 0;
+    font-size: 1.1em;
 }
 
 ul li a {
     text-decoration: none;
-    color: #2c3e50;
+    color: #1abc9c;
     font-weight: bold;
+    transition: color 0.3s ease;
 }
 
 ul li a:hover {
+    color: #16a085; /* Slightly darker on hover */
     text-decoration: underline;
 }
 
 .button-container {
     text-align: center;
-    margin: 20px 0;
+    margin: 30px 0;
 }
 
 .button {
     display: inline-block;
-    padding: 10px 20px;
-    background-color: #2c3e50;
+    padding: 12px 24px;
+    background-color: #1abc9c;
     color: white;
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
 }
 
 .button:hover {
-    background-color: #34495e;
+    background-color: #16a085; /* Slight hover effect */
 }
 
 footer {
     text-align: center;
-    padding: 10px 0;
-    background-color: #2c3e50;
+    padding: 15px 0;
+    background-color: #1abc9c;
     color: white;
+    font-size: 0.9em;
     margin-top: 40px;
 }
 
 canvas {
     display: block;
     margin: 0 auto;
+}
+
+/* Additional responsive tweaks */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1, h2 {
+        font-size: 1.4em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    .button {
+        font-size: 1em;
+    }
 }
