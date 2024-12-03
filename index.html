@@ -16,25 +16,41 @@
         <section id="introduction">
             <h2>Introduction</h2>
             <p>
-                Electric vehicles (EVs) have seen exponential growth over the past decade. This report provides insights into:
+                Electric vehicles (EVs) have seen exponential growth over the past decade. Starting with hybrid fuel vehicles and 
+                moving into fully electric powered vehicles, there are over 3 million EVs on the road globally today. As the world puts more importance 
+                on the effects of climate change and the impact of cars to the contribution of global warming,
+                more car companies are investing their efforts into creating EVs. The EV industry is relatively new, and understanding
+                the current market can give insight into which EVs are the most popular amongst consumers, which makes and models
+                are the most represented, and where they are located.
             </p>
+            <p>The main objectives of this project are:</p>
             <ul>
-                <li><a href="ev_type_distribution.html">graph 1</a></li>
-                 <li><a href="static_bar_chart.html">graph 2</a></li>
-                <li><a href="interactive_makemodel.html">Distribution of Makes and Models</a></li>
-                <li><a href="graph-4.html">graph 4</a></li>
-                <li><a href="graph-5.html">graph 5</a></li>
+                <li>To analyze the trends in electric car adoption.</li>
+                <li>To identify the key factors driving EV growth.</li>
+                <li>To identify leaders within the EV market.</li>
+                <li>To provide data-driven recommendations for policymakers and manufacturers.</li>
             </ul>
+            <h2>Data</h2>
+            <p>The dataset was provided by the Washington State Department of Licensing. It has been distributed by 
+                <a href="https://catalog.data.gov/dataset/electric-vehicle-population-data">data.gov</a>, and can be accessed 
+                <a href="https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data">here</a>.
+                The provided data details all registered EVs in the state of Washington, in the United States. This dataset includes
+                over 217k electric vehicles registered in Washigton state.
+                It provides geographic infomation about the car (county, city, zip code),
+                about the car (model, make, model year, EV type, CAFV eligibility, electric range), and geographic vehicle location for GIS mapping.
+            </p>
         </section>
 
         <!-- Project Goals Section -->
-        <section id="project-goals">
-            <h2>Project Goals</h2>
-            <p>The main objectives of this project are:</p>
+        <section id="visualizations">
+            <h2>Visualizations</h2>
+            <p>This report provides insights into:</p>
             <ul>
-                <li>To analyze the trends in electric car adoption globally.</li>
-                <li>To identify the key factors driving EV growth.</li>
-                <li>To provide data-driven recommendations for policymakers and manufacturers.</li>
+                <li><a href="ev_type_distribution.html">EV Type Distribution</a></li>
+                <li><a href="static_bar_chart.html">Top Manufacturers</a></li>
+                <li><a href="interactive_makemodel.html">Distribution of Makes and Models</a></li>
+                <li><a href="graph-4.html">graph 4</a></li>
+                <li><a href="graph-5.html">graph 5</a></li>
             </ul>
         </section>
 
@@ -45,12 +61,29 @@
                 The findings of this analysis demonstrate the growing importance of electric vehicles in achieving global sustainability goals.
                 As governments and industries continue to invest in EVs, the potential for widespread adoption becomes increasingly viable.
             </p>
+            <p>
+                However, this dataset only represents the EV population in the state of Washington. Washington has a higher average income than
+                the average state in the United States, as well as a large population density around Seattle. There may be bias towards how many 
+                citizens can afford to own a EV compared to the average American.
+            </p>
+            <p>
+                Further exploration of EV data can be done to more accurately understand the American market, and delve further into global market 
+                analysis. Normalizing data based on population can also provide a more accurate representation of the market, or keeping in mind
+                the kind of household that would buy an EV can give more context to the data visualizations and results.
+            </p>
+        </section>
+
+        <!-- References Section -->
+        <section id="reference">
+            <h2>References</h2>
+            <p>Earl, J., & Fell, M. J. (2019). Electric vehicle manufacturers’ perceptions of the market potential for demand-side flexibility using electric vehicles in the United Kingdom. Energy Policy, 129, 646–652. https://doi.org/10.1016/j.enpol.2019.02.040 
+            </p>
         </section>
     </div>
 
     <footer>
-        <p>Electric Car Population Analysis Report | 2024</p>
-        <p>Group Members: John Doe, Jane Smith, Alex Johnson</p>
+        <p>Electric Car Population Analysis Report | DS4200 Fall 2024</p>
+        <p>Group Members: Catherina Haast, Xusheng Shangguan, Kimberly Tai, Sharon Wilfred</p>
     </footer>
 </body>
 </html>
