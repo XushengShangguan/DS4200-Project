@@ -8,10 +8,29 @@
   <style>
     .bar { fill: steelblue; }
     .axis-label { font-size: 12px; font-weight: bold; }
+    .button-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .return-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #2c3e50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+    }
+    .return-button:hover {
+      background-color: #34495e;
+    }
   </style>
 </head>
 <body>
   <h2 style="text-align: center;">Top EV Manufacturers by Vehicle Count</h2>
+
   <script>
     // Set dimensions
     const width = 800, height = 400, margin = { top: 20, right: 30, bottom: 100, left: 60 };
@@ -87,5 +106,10 @@
          .text("Vehicle Count");
     });
   </script>
+
+  <!-- "Return to Main Page" Button -->
+  <div class="button-container">
+    <a href="index.html" class="return-button">Return to Main Page</a>
+  </div>
 </body>
 </html>
