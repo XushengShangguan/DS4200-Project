@@ -78,4 +78,26 @@ ecar.then(function(data) {
         .attr("x", 15)
         .attr("y", 15)
         .text(d => d);
+    
+    const tooltip = d3.select("body").append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("background", "#f9f9f9")
+    .style("border", "1px solid #ccc")
+    .style("padding", "5px")
+    .style("border-radius", "4px");
+
+    svg.selectAll("circle")
+    .on("mouseover", (event, d) => {
+        tooltip.html(`Year: ${d.ModelYear}<br>Range: ${d.ElectricRange}`)
+               .style("visibility", "visible")
+               .style("top", `${event.pageY - 10}px`)
+               .style("left", `${event.pageX + 10}px`);
+    })
+    .on("mousemove", event => {
+        tooltip.style("top", `${event.pageY - 10}px`)
+               .style("left", `${event.pageX + 10}px`);
+    })
+    .on("mouseout", () => tooltip.style("visibility", "hidden"));
+
 });
