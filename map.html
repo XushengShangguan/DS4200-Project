@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .button-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .return-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #2c3e50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+    }
+    .return-button:hover {
+      background-color: #34495e;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Interactive Map Dashboard</h1>
+  </header>
+  <div class="container">
+    <iframe src="https://www.arcgis.com/apps/dashboards/383e4b8f06fc4559ba242a41b681f828" height="500" width="900"></iframe>
+  
+  <p>
+    This interactive dashboard visualizes the distribution of electric vehicles (EVs) across postal codes in Washington State. The main map layer uses a heat map to display the total number of EVs in each postal code, providing an intuitive overview of EV concentration across the region. Users can explore specific postal codes through interactive pop-ups that feature pie charts showing the percentage breakdown of EVs by manufacturer, highlighting the market presence of leading brands like Tesla, BMW, and Nissan. Additional filtering tools, such as sliders and selectors, allow users to dynamically analyze postal codes with high EV counts, offering deeper insights into the growing adoption of green transportation solutions. This dashboard not only showcases the geographical distribution of EVs but also provides actionable insights into consumer preferences and manufacturer trends, reflecting the state’s shift toward a sustainable future.
+    </p>
+
+  <!-- "Return to Main Page" Button -->
+  <div class="button-container">
+    <a href="index.html" class="return-button">Return to Main Page</a>
+  </div>
+  </div>
+</body>
+</html>
